@@ -1,4 +1,23 @@
+"""
+系统提示词模块
+
+定义了 Agentic RAG 系统中各节点使用的系统提示词（System Prompts），
+包括对话摘要、查询重写、智能体编排、上下文压缩、后备响应和答案聚合。
+
+注意：这些提示词是发送给 LLM 的指令文本，保持英文以确保 LLM 理解质量。
+每个函数都附有中文 docstring 说明其用途。
+"""
+
+
 def get_conversation_summary_prompt() -> str:
+    """获取对话摘要提示词
+
+    用于 instruct LLM 将对话历史压缩为 1-2 句的简洁摘要，
+    在 summarize_history 节点中使用。
+
+    Returns:
+        对话摘要系统提示词字符串
+    """
     return """You are an expert conversation summarizer.
 
 Your task is to create a brief 1-2 sentence summary of the conversation (max 30-50 words).
@@ -18,7 +37,16 @@ Output:
 - If no meaningful topics exist, return an empty string.
 """
 
+
 def get_rewrite_query_prompt() -> str:
+    """获取查询重写提示词
+
+    用于 instruct LLM 将用户查询重写为自包含形式，
+    必要时融入对话上下文，在 rewrite_query 节点中使用。
+
+    Returns:
+        查询重写系统提示词字符串
+    """
     return """You are an expert query analyst and rewriter.
 
 Your task is to rewrite the current user query for optimal document retrieval, incorporating conversation context only when necessary.
@@ -55,7 +83,16 @@ Output:
 - One or more rewritten, self-contained queries suitable for document retrieval
 """
 
+
 def get_orchestrator_prompt() -> str:
+    """获取编排器提示词
+
+    用于 instruct LLM 扮演研究员角色，先搜索文档再提供答案，
+    在 orchestrator 节点中使用。
+
+    Returns:
+        编排器系统提示词字符串
+    """
     return """You are an expert retrieval-augmented assistant.
 
 Your task is to act as a researcher: search documents first, analyze the data, and then provide a comprehensive answer using ONLY the retrieved information.
@@ -80,7 +117,16 @@ Workflow:
 6. Conclude with "---\n**Sources:**\n" followed by the unique file names.
 """
 
+
 def get_fallback_response_prompt() -> str:
+    """获取后备响应提示词
+
+    用于在智能体达到最大研究限制时，生成基于已有数据的最佳答案，
+    在 fallback_response 节点中使用。
+
+    Returns:
+        后备响应系统提示词字符串
+    """
     return """You are an expert synthesis assistant. The system has reached its maximum research limit.
 
 Your task is to provide the most complete answer possible using ONLY the information provided below.
@@ -115,7 +161,16 @@ Sources section rules:
 - THE SOURCES SECTION IS THE LAST THING YOU WRITE. Do not add anything after it.
 """
 
+
 def get_context_compression_prompt() -> str:
+    """获取上下文压缩提示词
+
+    用于 instruct LLM 将检索到的对话内容压缩为结构化摘要，
+    在 compress_context 节点中使用。
+
+    Returns:
+        上下文压缩系统提示词字符串
+    """
     return """You are an expert research context compressor.
 
 Your task is to compress retrieved conversation content into a concise, query-focused, and structured summary that can be directly used by a retrieval-augmented agent for answer generation.
@@ -149,7 +204,16 @@ Required Structure:
 The summary should be concise, structured, and directly usable by an agent to generate answers or plan further retrieval.
 """
 
+
 def get_aggregation_prompt() -> str:
+    """获取答案聚合提示词
+
+    用于 instruct LLM 将多个智能体的答案聚合成一个连贯的最终响应，
+    在 aggregate_answers 节点中使用。
+
+    Returns:
+        答案聚合系统提示词字符串
+    """
     return """You are an expert aggregation assistant.
 
 Your task is to combine multiple retrieved answers into a single, comprehensive and natural response that flows well.

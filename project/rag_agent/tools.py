@@ -47,11 +47,11 @@ class ToolFactory:
             if not results:
                 return "NO_RELEVANT_CHUNKS"
 
-            # 将搜索结果格式化为可读文本
+            # 将搜索结果格式化为可读文本，每条结果包含：父块 ID、源文件名、子块内容
             return "\n\n".join([
-                f"Parent ID: {doc.metadata.get('parent_id', '')}\n"
-                f"File Name: {doc.metadata.get('source', '')}\n"
-                f"Content: {doc.page_content.strip()}"
+                f"父块 ID：{doc.metadata.get('parent_id', '')}\n"
+                f"文件名：{doc.metadata.get('source', '')}\n"
+                f"内容：{doc.page_content.strip()}"
                 for doc in results
             ])            
 
@@ -80,11 +80,11 @@ class ToolFactory:
             if not raw_parents:
                 return "NO_PARENT_DOCUMENTS"
 
-            # 将批量检索结果格式化为可读文本
+            # 将批量检索结果格式化为可读文本，每条结果包含：父块 ID、源文件名、父块内容
             return "\n\n".join([
-                f"Parent ID: {doc.get('parent_id', 'n/a')}\n"
-                f"File Name: {doc.get('metadata', {}).get('source', 'unknown')}\n"
-                f"Content: {doc.get('content', '').strip()}"
+                f"父块 ID：{doc.get('parent_id', 'n/a')}\n"
+                f"文件名：{doc.get('metadata', {}).get('source', 'unknown')}\n"
+                f"内容：{doc.get('content', '').strip()}"
                 for doc in raw_parents
             ])            
 
@@ -110,11 +110,11 @@ class ToolFactory:
             if not parent:
                 return "NO_PARENT_DOCUMENT"
 
-            # 将检索结果格式化为可读文本
+            # 将检索结果格式化为可读文本，包含：父块 ID、源文件名、父块内容
             return (
-                f"Parent ID: {parent.get('parent_id', 'n/a')}\n"
-                f"File Name: {parent.get('metadata', {}).get('source', 'unknown')}\n"
-                f"Content: {parent.get('content', '').strip()}"
+                f"父块 ID：{parent.get('parent_id', 'n/a')}\n"
+                f"文件名：{parent.get('metadata', {}).get('source', 'unknown')}\n"
+                f"内容：{parent.get('content', '').strip()}"
             )          
 
         except Exception as e:
@@ -123,15 +123,31 @@ class ToolFactory:
     def create_tools(self) -> List:
         """创建并返回智能体可用的工具列表。
 
-        将内部方法包装为 LangChain Tool 对象，
+        使用装饰器定义 LangChain Tool 对象，
         使其可以被 LangGraph 智能体通过工具调用来执行检索操作。
 
         Returns:
             包含两个 LangChain Tool 对象的列表：
-            1. search_child_chunks — 搜索相关子块
-            2. retrieve_parent_chunks — 检索完整父块
+            1. search_child_chunks — 搜索相关子块（小片段）
+            2. retrieve_parent_chunks — 检索完整父块（大段落）
         """
-        search_tool = tool("search_child_chunks")(self._search_child_chunks)
-        retrieve_tool = tool("retrieve_parent_chunks")(self._retrieve_parent_chunks)
+        @tool("search_child_chunks")
+        def search_tool(query: str, limit: int) -> str:
+            """在向量数据库中搜索最相关的 K 个子块（小片段）。
+
+            Args:
+                query: 搜索查询字符串
+                limit: 返回的最大结果数量
+            """
+            return self._search_child_chunks(query, limit)
+
+        @tool("retrieve_parent_chunks")
+        def retrieve_tool(parent_id: str) -> str:
+            """根据 ID 检索单个完整的父块（大段落）。
+
+            Args:
+                parent_id: 要检索的父块唯一标识符
+            """
+            return self._retrieve_parent_chunks(parent_id)
         
         return [search_tool, retrieve_tool]

@@ -35,6 +35,9 @@ HEADERS_TO_SPLIT_ON = [
     ("###", "H3")
 ]
 
+# --- MinerU Configuration ---
+MINERU_BACKEND = os.environ.get("MINERU_BACKEND", "pipeline")
+
 # --- Langfuse Observability ---
 LANGFUSE_ENABLED = os.environ.get("LANGFUSE_ENABLED", "false").lower() == "true"
 LANGFUSE_PUBLIC_KEY = os.environ.get("LANGFUSE_PUBLIC_KEY", "")

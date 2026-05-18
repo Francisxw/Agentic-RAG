@@ -1,3 +1,9 @@
+"""
+RAG 系统模块
+
+作为整个 Agentic RAG 系统的统一入口，编排文档索引、向量检索、
+LangGraph 智能体工作流和可观测性组件。
+"""
 import uuid
 from langchain_ollama import ChatOllama
 import config
@@ -10,7 +16,7 @@ from core.observability import Observability
 
 
 class RAGSystem:
-    """Agentic RAG 系统入口
+    """Agentic RAG 系统入口类
 
     作为整个 RAG 系统的统一入口，编排文档索引、向量检索、
     LangGraph 智能体工作流和可观测性组件。
