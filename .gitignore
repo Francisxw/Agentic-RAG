@@ -1,4 +1,6 @@
 .DS_Store
+notebooks/
+assets/logo.png
 qdrant_db/
 markdown_docs/
 parent_store/
